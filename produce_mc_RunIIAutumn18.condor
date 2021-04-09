@@ -1,0 +1,23 @@
+universe = vanilla
++DESIRED_Sites="T2_US_UCSD"
+
+request_cpus = 1
+request_disk = 8000000
+request_memory = 1024
+
+Requirements = HasSingularity
++SingularityImage = "/cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel6-m20201113"
+
+executable = produce_mc_RunIIAutumn18.sh
+arguments = $(Process) 10 SMS-TChiHH_mChi-500_mLSP-1__RunIIAutumn18.env
+transfer_executable = True
+transfer_input_files = voms_proxy.txt,SMS-TChiHH_mChi-500_mLSP-1__RunIIAutumn18.env,SMS-TChiHH_mChi-500_mLSP-1__RunIIFall17Autumn18__fragment.py
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+Notification = Never
+Log=log_produce_mc_$(Cluster).$(Process).log
+output=log_produce_mc_$(Cluster).$(Process).out
+error=log_produce_mc_$(Cluster).$(Process).err
+
+queue
