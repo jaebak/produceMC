@@ -14,7 +14,7 @@ singularity shell -B /cvmfs -B /etc/grid-security /cvmfs/unpacked.cern.ch/regist
 # At CERN for rhel6
 singularity shell -B /cvmfs -B /etc/grid-security -B /afs/cern.ch/work/j/jaebak/analysis /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel6-m20201113
 
-./produce_mc_RunIISummer20UL18.sh 0 100 ./config/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL18.env 2>&1 | tee produce.log
+./produce_mc_RunIISummer20UL18.sh 0 100 ./mc_datasets_config/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL18.env 2>&1 | tee produce.log
 ```
 
 # Submitting condor
