@@ -1,0 +1,23 @@
+universe = vanilla
++DESIRED_Sites="T2_US_UCSD"
+
+request_cpus = 1
+request_disk = 8000000
+request_memory = 1024
+
+Requirements = HasSingularity
++SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64"
+
+executable = produce_mc_RunIISummer20UL16.sh
+arguments = $(Process) 2500 DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL16.env
+transfer_executable = True
+transfer_input_files = voms_proxy.txt,DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL16__fragment.py
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+Notification = Never
+Log=log_produce_mc_$(Cluster).$(Process).log
+output=log_produce_mc_$(Cluster).$(Process).out
+error=log_produce_mc_$(Cluster).$(Process).err
+
+queue
