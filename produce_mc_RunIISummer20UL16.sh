@@ -45,6 +45,9 @@ TAG="$BASE_TAG""__job-"${JOBNUM}
 #MINIAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16MiniAODv3__PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1__privateProduction__"$JOBNUM".root"
 #NANOAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16NanoAODv7__PUSummer16v3Fast_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1__privateProduction__"$JOBNUM".root"
 
+mkdir config
+mv $Fragment_filename config
+
 if [ ! -f "config/${Fragment_filename}" ]; then
   echo "config/${Fragment_filename} does not exist"
   exit
@@ -58,7 +61,9 @@ fi
 
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 
-cat <<EndOfTestFile > "$TAG"_cmd.sh
+mkdir job_scripts
+
+cat <<EndOfTestFile > job_scripts/"$TAG"_cmd.sh
 #!/bin/bash
 
 echo "----GEN----"
@@ -258,11 +263,9 @@ rm -f ${TAG}__NanoAODv9__cfg.py
 EndOfTestFile
 
 echo "Made "$TAG"_cmd.sh"
-chmod +x "$TAG"_cmd.sh
+chmod +x job_scripts/"$TAG"_cmd.sh
 
 #export SINGULARITY_CACHEDIR="/tmp/$(whoami)/singularity"
 #singularity run -B /cvmfs -B /etc/grid-security docker://cmssw/slc6:latest $(echo $(pwd)/"$TAG"_cmd.sh)
 
-./${TAG}_cmd.sh
-
-rm ${TAG}_cmd.sh
+./job_scripts/${TAG}_cmd.sh
