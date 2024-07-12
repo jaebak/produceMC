@@ -26,19 +26,19 @@ when_to_transfer_output = ON_EXIT
 #queue
 
 # Testing small (Takes 1.5 hours)
-executable = produce_mc_RunIISummer20UL16.SUS.sh
+executable = produce_mc_RunIISummer20UL16.SUS.seed.sh
 RND_SEED = $(Process) + 0
 arguments = $INT(RND_SEED) 200 SMS-TChiHH_HToGG_2D_TuneCP5_13TeV-madgraphMLM-pythia8__RunIISummer20UL16.FullSim.env
 queue 1
 
 ## Testing larger (Takes 5 hours)
-#executable = produce_mc_RunIISummer20UL16.SUS.sh
+#executable = produce_mc_RunIISummer20UL16.SUS.seed.sh
 #RND_SEED = $(Process) + 0
 #arguments = $INT(RND_SEED) 1000 SMS-TChiHH_HToGG_2D_TuneCP5_13TeV-madgraphMLM-pythia8__RunIISummer20UL16.FullSim.env
 #queue 10
 
 ## Run 1 (10k could take 14 hours)
-#executable = produce_mc_RunIISummer20UL16.SUS.sh
+#executable = produce_mc_RunIISummer20UL16.SUS.seed.sh
 #RND_SEED = $(Process) + 0
 #arguments = $INT(RND_SEED) 3000 SMS-TChiHH_HToGG_2D_TuneCP5_13TeV-madgraphMLM-pythia8__RunIISummer20UL16.FullSim.env
 #queue 300
