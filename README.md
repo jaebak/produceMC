@@ -3,6 +3,7 @@ Files for producing MC with cmssw. Uses condor and singularity.
 Note: Use `produce_*.seed.sh` files
 - `produce_mc_RunIISummer20UL18.sh` does not randomize seed for DYJets.
 - `produce_mc_RunIISummer20UL18.seed.sh` will randomize seed for DYJets.
+- All `produce_*SUS*.sh` seem to be not reproducable.
 
 # Testing production: Reference ``2021.10.23.HToAll/cmssw_generation.org``
 ```bash
