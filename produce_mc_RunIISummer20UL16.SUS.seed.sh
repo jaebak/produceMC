@@ -87,7 +87,7 @@ cd ../..
 
 echo "Make cmssw configuration file"
 Output_filename=$AOD_NAME"__job-"${JOBNUM}"__GEN".root
-cmsDriver.py Configuration/GenProduction/python/$Fragment_filename --python_filename "$TAG"__GEN__cfg.py --eventcontent RAWSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_v13 --beamspot Realistic25ns13TeV2016Collision --customise_commands "from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.resetSeeds(${JOBNUM})\nprocess.source.numberEventsInLuminosityBlock = cms.untracked.uint32(200)\n process.source.firstRun = cms.untracked.uint32(${JOBNUM})" --step GEN --geometry DB:Extended --era Run2_2016 --no_exec --mc -n $NEVENTS
+cmsDriver.py Configuration/GenProduction/python/$Fragment_filename --python_filename "$TAG"__GEN__cfg.py --eventcontent RAWSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_v13 --beamspot Realistic25ns13TeV2016Collision --customise_commands "from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.resetSeeds(${JOBNUM})\nprocess.source.numberEventsInLuminosityBlock = cms.untracked.uint32(200)" --step GEN --geometry DB:Extended --era Run2_2016 --no_exec --mc -n $NEVENTS
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__GEN__cfg.py
