@@ -10,9 +10,12 @@ export SINGULARITY_CACHEDIR="/tmp/$(whoami)/singularity"
 # At UCSD for rhel6
 singularity shell -B /cvmfs -B /etc/grid-security /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel6-m20201113
 # At UCSB for cc7 (Ref: https://cms-sw.github.io/singularity.html)
-singularity shell -B /cvmfs -B /etc/grid-security /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/cc7:x86_64
+singularity shell -B /cvmfs -B /etc/grid-security /cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/el7:x86_64
 # At CERN for rhel6
 singularity shell -B /cvmfs -B /etc/grid-security -B /afs/cern.ch/work/j/jaebak/analysis /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel6-m20201113
+# At CMSCONNECT for cc7
+singularity shell -B /cvmfs -B /etc/grid-security -B /ospool/cms-user/jaebak /cvmfs/singularity.opensciencegrid.org/cmssw/cmssw/cms:rhel7
+
 
 mkdir test
 cd test

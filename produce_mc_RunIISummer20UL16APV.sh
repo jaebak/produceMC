@@ -45,6 +45,9 @@ TAG="$BASE_TAG""__job-"${JOBNUM}
 #MINIAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16MiniAODv3__PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1__privateProduction__"$JOBNUM".root"
 #NANOAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16NanoAODv7__PUSummer16v3Fast_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1__privateProduction__"$JOBNUM".root"
 
+mkdir config
+mv $Fragment_filename config
+
 if [ ! -f "config/${Fragment_filename}" ]; then
   echo "config/${Fragment_filename} does not exist"
   exit
@@ -58,7 +61,9 @@ fi
 
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 
-cat <<EndOfTestFile > "$TAG"_cmd.sh
+mkdir job_scripts
+
+cat <<EndOfTestFile > job_scripts/"$TAG"_cmd.sh
 #!/bin/bash
 
 echo "----GEN----"
@@ -183,16 +188,16 @@ echo "Run cmssw with configuration file"
 cmsRun "$TAG"__AOD__cfg.py
 
 echo "----MiniAODv2----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16MiniAODAPV-00001
+# https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/HIG-RunIISummer20UL16MiniAODAPVv2-12976
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-if [ -r CMSSW_10_6_17/src ] ; then
-  echo release CMSSW_10_6_17 already exists
+if [ -r CMSSW_10_6_25/src ] ; then
+  echo release CMSSW_10_6_25 already exists
 else
-  scram p CMSSW CMSSW_10_6_17
+  scram p CMSSW CMSSW_10_6_25
 fi
-cd CMSSW_10_6_17/src
+cd CMSSW_10_6_25/src
 eval \`scram runtime -sh\`
 scram b
 cd ../..
@@ -200,22 +205,23 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$AOD_NAME"__job-"${JOBNUM}.root
 Output_filename=$MINIAOD_NAME"__job-"${JOBNUM}.root
-cmsDriver.py  --python_filename "$TAG"__MiniAODv2__cfg.py --eventcontent MINIAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier MINIAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_preVFP_v8 --step PAT --geometry DB:Extended --filein file:\$Input_filename --era Run2_2016_HIPM --runUnscheduled --no_exec --mc -n -1
+#cmsDriver.py  --python_filename "$TAG"__MiniAODv2__cfg.py --eventcontent MINIAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier MINIAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_preVFP_v8 --step PAT --geometry DB:Extended --filein file:\$Input_filename --era Run2_2016_HIPM --runUnscheduled --no_exec --mc -n -1
+cmsDriver.py  --python_filename "$TAG"__MiniAODv2__cfg.py --eventcontent MINIAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier MINIAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_preVFP_v11 --step PAT --procModifiers run2_miniAOD_UL --geometry DB:Extended --filein file:\$Input_filename --era Run2_2016_HIPM --runUnscheduled --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__MiniAODv2__cfg.py
 
 echo "----NanoAODv9----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16NanoAODAPVv2-00001
+# https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/HIG-RunIISummer20UL16NanoAODAPVv9-12612
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-if [ -r CMSSW_10_6_19_patch2/src ] ; then
-  echo release CMSSW_10_6_19_patch2 already exists
+if [ -r CMSSW_10_6_32_patch1/src ] ; then
+  echo release CMSSW_10_6_32_patch1 already exists
 else
-  scram p CMSSW CMSSW_10_6_19_patch2
+  scram p CMSSW CMSSW_10_6_32_patch1
 fi
-cd CMSSW_10_6_19_patch2/src
+cd CMSSW_10_6_32_patch1/src
 eval \`scram runtime -sh\`
 scram b
 cd ../..
@@ -223,7 +229,9 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$MINIAOD_NAME"__job-"${JOBNUM}.root
 Output_filename=$NANOAOD_NAME"__job-"${JOBNUM}.root
-cmsDriver.py --python_filename "$TAG"__NanoAODv9__cfg.py --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_preVFP_v9 --step NANO --filein file:\$Input_filename --era Run2_2016,run2_nanoAOD_106Xv1 --no_exec --mc -n -1
+#cmsDriver.py --python_filename "$TAG"__NanoAODv9__cfg.py --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_preVFP_v9 --step NANO --filein file:\$Input_filename --era Run2_2016,run2_nanoAOD_106Xv1 --no_exec --mc -n -1
+
+cmsDriver.py --python_filename "$TAG"__NanoAODv9__cfg.py --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_preVFP_v11 --step NANO --filein file:\$Input_filename --era Run2_2016_HIPM,run2_nanoAOD_106Xv2 --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__NanoAODv9__cfg.py
@@ -254,15 +262,15 @@ rm -f ${TAG}__MiniAODv2__cfg.py
 rm -rf CMSSW_10_6_19_patch2/
 rm -f ${TAG}__NanoAODv9__cfg.py
 
+date
+
 # End of "$TAG"_cmd.sh file
 EndOfTestFile
 
 echo "Made "$TAG"_cmd.sh"
-chmod +x "$TAG"_cmd.sh
+chmod +x job_scripts/"$TAG"_cmd.sh
 
 #export SINGULARITY_CACHEDIR="/tmp/$(whoami)/singularity"
 #singularity run -B /cvmfs -B /etc/grid-security docker://cmssw/slc6:latest $(echo $(pwd)/"$TAG"_cmd.sh)
 
-./${TAG}_cmd.sh
-
-rm ${TAG}_cmd.sh
+./job_scripts/${TAG}_cmd.sh
