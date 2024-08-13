@@ -63,17 +63,14 @@ export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 
 mkdir job_scripts
 
-# https://cms-pdmv.cern.ch/mcm/chained_requests?contains=EGM-RunIISummer20UL18NanoAODv9-00004&page=0&shown=15
-
 cat <<EndOfTestFile > job_scripts/"$TAG"_cmd.sh
 #!/bin/bash
 
 echo "----GEN----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL18wmLHEGEN-00001
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16wmLHEGEN-00003
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/HIG-RunIISummer20UL18wmLHEGEN-02938 uses CMSSW_10_6_29_patch1
 if [ -r CMSSW_10_6_19_patch3/src ] ; then
   echo release CMSSW_10_6_19_patch3 already exists
 else
@@ -89,13 +86,13 @@ cd ../..
 
 echo "Make cmssw configuration file"
 Output_filename=$AOD_NAME"__job-"${JOBNUM}"__LHE".root
-cmsDriver.py Configuration/GenProduction/python/$Fragment_filename --python_filename "$TAG"__LHE__cfg.py --eventcontent RAWSIM,LHE --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN,LHE --fileout file:\$Output_filename --conditions 106X_upgrade2018_realistic_v4 --beamspot Realistic25ns13TeVEarly2018Collision --customise_commands "process.source.numberEventsInLuminosityBlock = cms.untracked.uint32(100) \n process.source.firstRun = cms.untracked.uint32(${JOBNUM})" --step LHE,GEN --geometry DB:Extended --era Run2_2018 --no_exec --mc -n $NEVENTS
+cmsDriver.py Configuration/GenProduction/python/$Fragment_filename --python_filename "$TAG"__LHE__cfg.py --eventcontent RAWSIM,LHE --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN,LHE --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_v13 --beamspot Realistic25ns13TeV2016Collision --customise_commands "from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.resetSeeds(${JOBNUM})\nprocess.source.numberEventsInLuminosityBlock = cms.untracked.uint32(100)" --step LHE,GEN --geometry DB:Extended --era Run2_2016 --no_exec --mc -n $NEVENTS
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__LHE__cfg.py
 
 echo "----SIM----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL18SIM-00002
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16SIM-00001
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -113,13 +110,13 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$AOD_NAME"__job-"${JOBNUM}"__LHE".root
 Output_filename=$AOD_NAME"__job-"${JOBNUM}"__SIM".root
-cmsDriver.py --python_filename "$TAG"__SIM__cfg.py --eventcontent RAWSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM --fileout file:\$Output_filename --conditions 106X_upgrade2018_realistic_v11_L1v1 --beamspot Realistic25ns13TeVEarly2018Collision --step SIM --geometry DB:Extended --filein file:\$Input_filename --era Run2_2018 --runUnscheduled --no_exec --mc -n -1
+cmsDriver.py --python_filename "$TAG"__SIM__cfg.py --eventcontent RAWSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_v13 --beamspot Realistic25ns13TeV2016Collision --step SIM --geometry DB:Extended --filein file:\$Input_filename --era Run2_2016 --runUnscheduled --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__SIM__cfg.py
 
 echo "----DIGIPREMIX----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL18DIGIPremix-00002
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16DIGIPremix-00001
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -137,22 +134,22 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$AOD_NAME"__job-"${JOBNUM}"__SIM".root
 Output_filename=$AOD_NAME"__job-"${JOBNUM}"__DIGIPREMIX".root
-cmsDriver.py --python_filename "$TAG"__DIGIPREMIX__cfg.py --eventcontent PREMIXRAW --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM-DIGI --fileout file:\$Output_filename --pileup_input "dbs:/Neutrino_E-10_gun/RunIISummer20ULPrePremix-UL18_106X_upgrade2018_realistic_v11_L1v1-v2/PREMIX" --conditions 106X_upgrade2018_realistic_v11_L1v1 --step DIGI,DATAMIX,L1,DIGI2RAW --procModifiers premix_stage2 --geometry DB:Extended --filein file:\$Input_filename --datamix PreMix --era Run2_2018 --runUnscheduled --no_exec --mc -n -1
+cmsDriver.py --python_filename "$TAG"__DIGIPREMIX__cfg.py --eventcontent PREMIXRAW --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM-DIGI --fileout file:\$Output_filename --pileup_input "dbs:/Neutrino_E-10_gun/RunIISummer20ULPrePremix-UL16_106X_mcRun2_asymptotic_v13-v1/PREMIX" --conditions 106X_mcRun2_asymptotic_v13 --step DIGI,DATAMIX,L1,DIGI2RAW --procModifiers premix_stage2 --geometry DB:Extended --filein file:\$Input_filename --datamix PreMix --era Run2_2016 --runUnscheduled --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__DIGIPREMIX__cfg.py
 
 echo "----HLT----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL18HLT-00002
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16HLT-00001
 echo "Setting up CMSSW"
-export SCRAM_ARCH=slc7_amd64_gcc700
+export SCRAM_ARCH=slc7_amd64_gcc530
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-if [ -r CMSSW_10_2_16_UL/src ] ; then
-  echo release CMSSW_10_2_16_UL already exists
+if [ -r CMSSW_8_0_33_UL/src ] ; then
+  echo release CMSSW_8_0_33_UL already exists
 else
-  scram p CMSSW CMSSW_10_2_16_UL
+  scram p CMSSW CMSSW_8_0_33_UL
 fi
-cd CMSSW_10_2_16_UL/src
+cd CMSSW_8_0_33_UL/src
 eval \`scram runtime -sh\`
 # Setup custom fragment for CMSSW
 scram b
@@ -161,13 +158,13 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$AOD_NAME"__job-"${JOBNUM}"__DIGIPREMIX".root
 Output_filename=$AOD_NAME"__job-"${JOBNUM}"__HLT".root
-cmsDriver.py --python_filename "$TAG"__HLT__cfg.py --eventcontent RAWSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM-RAW --fileout file:\$Output_filename --conditions 102X_upgrade2018_realistic_v15 --customise_commands 'process.source.bypassVersionCheck = cms.untracked.bool(True)' --step HLT:2018v32 --geometry DB:Extended --filein file:\$Input_filename --era Run2_2018 --no_exec --mc -n -1
+cmsDriver.py --python_filename "$TAG"__HLT__cfg.py --eventcontent RAWSIM --outputCommand "keep *_mix_*_*,keep *_genPUProtons_*_*" --customise Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM-RAW --inputCommands "keep *","drop *_*_BMTF_*","drop *PixelFEDChannel*_*_*_*" --fileout file:\$Output_filename --conditions 80X_mcRun2_asymptotic_2016_TrancheIV_v6 --customise_commands 'process.source.bypassVersionCheck = cms.untracked.bool(True)' --step HLT:25ns15e33_v4 --geometry DB:Extended --filein file:\$Input_filename --era Run2_2016 --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__HLT__cfg.py
 
 echo "----RECO----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL18RECO-00002
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16RECO-00001
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -185,22 +182,22 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$AOD_NAME"__job-"${JOBNUM}"__HLT".root
 Output_filename=$AOD_NAME"__job-"${JOBNUM}.root
-cmsDriver.py --python_filename "$TAG"__AOD__cfg.py --eventcontent AODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier AODSIM --fileout file:\$Output_filename --conditions 106X_upgrade2018_realistic_v11_L1v1 --step RAW2DIGI,L1Reco,RECO,RECOSIM,EI --geometry DB:Extended --filein file:\$Input_filename --era Run2_2018 --runUnscheduled --no_exec --mc -n -1
+cmsDriver.py --python_filename "$TAG"__AOD__cfg.py --eventcontent AODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier AODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_v13 --step RAW2DIGI,L1Reco,RECO,RECOSIM --geometry DB:Extended --filein file:\$Input_filename --era Run2_2016 --runUnscheduled --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__AOD__cfg.py
 
 echo "----MiniAODv2----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_setup/EGM-RunIISummer20UL18MiniAODv2-00004
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16MiniAODv2-00001
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-if [ -r CMSSW_10_6_20/src ] ; then
-  echo release CMSSW_10_6_20 already exists
+if [ -r CMSSW_10_6_25/src ] ; then
+  echo release CMSSW_10_6_25 already exists
 else
-  scram p CMSSW CMSSW_10_6_20
+  scram p CMSSW CMSSW_10_6_25
 fi
-cd CMSSW_10_6_20/src
+cd CMSSW_10_6_25/src
 eval \`scram runtime -sh\`
 scram b
 cd ../..
@@ -208,13 +205,13 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$AOD_NAME"__job-"${JOBNUM}.root
 Output_filename=$MINIAOD_NAME"__job-"${JOBNUM}.root
-cmsDriver.py  --python_filename "$TAG"__MiniAODv2__cfg.py --eventcontent MINIAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier MINIAODSIM --fileout file:\$Output_filename --conditions 106X_upgrade2018_realistic_v16_L1v1 --step PAT --procModifiers run2_miniAOD_UL --geometry DB:Extended --filein file:\$Input_filename --era Run2_2018 --runUnscheduled --no_exec --mc -n -1
+cmsDriver.py  --python_filename "$TAG"__MiniAODv2__cfg.py --eventcontent MINIAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier MINIAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_v17 --step PAT --procModifiers run2_miniAOD_UL --geometry DB:Extended --filein file:\$Input_filename --era Run2_2016 --runUnscheduled --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__MiniAODv2__cfg.py
 
 echo "----NanoAODv9----"
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL18NanoAODv9-00004
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EGM-RunIISummer20UL16NanoAODv9-00001
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -231,7 +228,7 @@ cd ../..
 echo "Make cmssw configuration file"
 Input_filename=$MINIAOD_NAME"__job-"${JOBNUM}.root
 Output_filename=$NANOAOD_NAME"__job-"${JOBNUM}.root
-cmsDriver.py --python_filename "$TAG"__NanoAODv9__cfg.py --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:\$Output_filename --conditions 106X_upgrade2018_realistic_v16_L1v1 --step NANO --filein file:\$Input_filename --era Run2_2018,run2_nanoAOD_106Xv2 --no_exec --mc -n -1
+cmsDriver.py --python_filename "$TAG"__NanoAODv9__cfg.py --eventcontent NANOAODSIM --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAODSIM --fileout file:\$Output_filename --conditions 106X_mcRun2_asymptotic_v17 --step NANO --filein file:\$Input_filename --era Run2_2016,run2_nanoAOD_106Xv2 --no_exec --mc -n -1
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__NanoAODv9__cfg.py
@@ -249,20 +246,18 @@ rm -f ${AOD_NAME}__job-${JOBNUM}__SIM.root
 rm -f "$TAG"__DIGIPREMIX__cfg.py
 rm -f ${AOD_NAME}__job-${JOBNUM}__DIGIPREMIX.root
 
-rm -rf CMSSW_10_2_16_UL
+rm -rf CMSSW_8_0_33_UL
 rm -f ${AOD_NAME}__job-${JOBNUM}__HLT.root
 rm -f ${TAG}__HLT__cfg.py
 
 rm -f ${TAG}__AOD__cfg.py
 rm -f ${AOD_NAME}__job-${JOBNUM}.root
 
-rm -rf CMSSW_10_6_20/
+rm -rf CMSSW_10_6_25/
 rm -f ${TAG}__MiniAODv2__cfg.py
 
 rm -rf CMSSW_10_6_26/
 rm -f ${TAG}__NanoAODv9__cfg.py
-
-date
 
 # End of "$TAG"_cmd.sh file
 EndOfTestFile
