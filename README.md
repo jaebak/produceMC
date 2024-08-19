@@ -19,7 +19,7 @@ singularity shell -B /cvmfs -B /etc/grid-security /cvmfs/unpacked.cern.ch/regist
 # At CERN for rhel6
 singularity shell -B /cvmfs -B /etc/grid-security -B /afs/cern.ch/work/j/jaebak/analysis /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel6-m20201113
 # At CMSCONNECT for cc7
-singularity shell -B /cvmfs -B /etc/grid-security -B /ospool/cms-user/jaebak /cvmfs/singularity.opensciencegrid.org/cmssw/cmssw/cms:rhel7
+singularity shell -B /cvmfs -B /etc/grid-security -B /ospool/cms-user/jaebak /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7
 
 
 mkdir test
