@@ -1,9 +1,26 @@
 Files for producing MC with cmssw. Uses condor and singularity.  
 
+Note that different years should use different seeds or can use `produce_*.seed.rand.sh`
 Note: Use `produce_*.seed.sh` files
 - `produce_mc_RunIISummer20UL18.sh` does not randomize seed for DYJets.
 - `produce_mc_RunIISummer20UL18.seed.sh` will randomize seed for DYJets.
 - All `produce_*SUS*.sh` seem to be not reproducable.
+
+# Getting valid premix file list
+
+```bash
+# Setup root on el9
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+cmsrel CMSSW_15_0_17
+cd CMSSW_15_0_17/src
+cmsenv
+cd -
+
+voms-proxy-init -voms cms -valid 168:0
+
+# Create valid_premix_fragment
+./scripts/find_valid_premix.py
+```
 
 # Testing production: Reference ``2021.10.23.HToAll/cmssw_generation.org``
 ```bash
@@ -19,6 +36,7 @@ singularity shell -B /cvmfs -B /etc/grid-security /cvmfs/unpacked.cern.ch/regist
 # At CERN for rhel6
 singularity shell -B /cvmfs -B /etc/grid-security -B /afs/cern.ch/work/j/jaebak/analysis /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel6-m20201113
 # At CMSCONNECT for cc7
+unset PERL5LIB; unset PYTHONPATH; 
 singularity shell -B /cvmfs -B /etc/grid-security -B /ospool/cms-user/jaebak /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7
 
 
@@ -26,6 +44,8 @@ mkdir test
 cd test
 cp ../voms_proxy.txt .
 cp ../config/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL18__fragment.py .
+cp ../replace_premix.py .
+cp ../valid_premix_fragment_2018 .
 ../produce_mc_RunIISummer20UL18.seed.sh 0 100 ../config/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISummer20UL18.env 2>&1 | tee produce.log
 ```
 

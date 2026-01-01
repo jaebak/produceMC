@@ -75,7 +75,7 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 if [ -r CMSSW_10_6_30_patch1/src ] ; then
   echo release CMSSW_10_6_30_patch1 already exists
 else
-  scram p CMSSW_10_6_30_patch1
+  scram p CMSSW CMSSW_10_6_30_patch1
 fi
 cd CMSSW_10_6_30_patch1/src
 eval \`scram runtime -sh\`
