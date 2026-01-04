@@ -25,11 +25,11 @@ when_to_transfer_output = ON_EXIT
 #executable = check_env.sh
 #queue
 
-# Testing small (Takes 1.5 hours)
-executable = produce_mc_Run3Summer22.SUS.seed.rand.sh
-RND_SEED = $(Process) + 0
-arguments = $INT(RND_SEED) 200 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer22.FullSim.env
-queue 1
+## Testing small (Takes 1.5 hours)
+#executable = produce_mc_Run3Summer22.SUS.seed.rand.sh
+#RND_SEED = $(Process) + 0
+#arguments = $INT(RND_SEED) 200 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer22.FullSim.env
+#queue 1
 
 ## Check nanoaod content, Check number of entries for each file
 ## Testing larger (Takes 5 hours)
@@ -38,13 +38,13 @@ queue 1
 #arguments = $INT(RND_SEED) 1000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer22.FullSim.env
 #queue 10
 
-## Run 1 (3000 could take 14 hours) 
-## Need to multiply 1.7 of jobs compared to HToGG due to increase of mass points.
-## HH->4b is 0.36. Need to increase by 2.7
-#executable = produce_mc_Run3Summer22.SUS.seed.rand.sh
-#RND_SEED = $(Process) + 0
-#arguments = $INT(RND_SEED) 3000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__RunIISummer22.FullSim.env
-#queue 5000
+# Run 1 (3000 could take 14 hours) 
+# Need to multiply 1.7 of jobs compared to HToGG due to increase of mass points.
+# HH->4b is 0.36. Need to increase by 2.7
+executable = produce_mc_Run3Summer22.SUS.seed.rand.sh
+RND_SEED = $(Process) + 0
+arguments = $INT(RND_SEED) 3000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__RunIISummer22.FullSim.env
+queue 5000
 
 ## Run 2 (3000 could take 14 hours) 
 ## Need to multiply 1.7 of jobs compared to HToGG due to increase of mass points.
