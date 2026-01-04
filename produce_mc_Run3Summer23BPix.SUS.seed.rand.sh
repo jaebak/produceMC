@@ -184,7 +184,7 @@ rm -f "$TAG"__AOD__cfg.py
 rm -f ${AOD_NAME}__job-${JOBNUM}.root
 
 rm -f ${TAG}__MiniAODv4__cfg.py
-#rm -f ${MINIAOD_NAME}__job-${JOBNUM}.root
+rm -f ${MINIAOD_NAME}__job-${JOBNUM}.root
 rm -f ${TAG}__NanoAODv12__cfg.py
 
 date

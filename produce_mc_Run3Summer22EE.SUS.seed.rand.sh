@@ -187,7 +187,7 @@ rm -f ${AOD_NAME}__job-${JOBNUM}.root
 
 rm -rf CMSSW_13_0_23
 rm -f ${TAG}__MiniAODv4__cfg.py
-#rm -f ${MINIAOD_NAME}__job-${JOBNUM}.root
+rm -f ${MINIAOD_NAME}__job-${JOBNUM}.root
 rm -f ${TAG}__NanoAODv12__cfg.py
 
 date
