@@ -39,6 +39,7 @@ singularity shell -B /cvmfs -B /etc/grid-security -B /afs/cern.ch/work/j/jaebak/
 unset PERL5LIB; unset PYTHONPATH; 
 singularity shell -B /cvmfs -B /etc/grid-security -B /ospool/cms-user/jaebak /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel7
 # At CMSCONNECT for alma8
+unset PERL5LIB; unset PYTHONPATH; 
 singularity shell -B /cvmfs -B /etc/grid-security -B /ospool/cms-user/jaebak /cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel8
 
 mkdir test

@@ -117,6 +117,9 @@ cmsDriver.py  --era Run3 --customise Configuration/DataProcessing/Utils.addMonit
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__DIGIPREMIX__cfg.py
 
+echo "Clean up files"
+rm -f \$Input_filename
+
 echo "----RECO----"
 
 echo "Make cmssw configuration file"
@@ -126,6 +129,9 @@ cmsDriver.py  --era Run3 --customise Configuration/DataProcessing/Utils.addMonit
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__AOD__cfg.py
+
+echo "Clean up files"
+rm -f \$Input_filename
 
 echo "----MiniAODv4----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-Run3Summer22MiniAODv4-00151
@@ -149,6 +155,9 @@ cmsDriver.py  --era Run3,run3_miniAOD_12X --customise Configuration/DataProcessi
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__MiniAODv4__cfg.py
+
+echo "Clean up files"
+rm -f \$Input_filename
 
 echo "----NanoAODv12----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-Run3Summer22NanoAODv12-00048
@@ -177,13 +186,10 @@ echo "Clean up files"
 
 rm -rf CMSSW_12_4_24
 rm -f ${TAG}__LHE__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}__SIM.root
 
 rm -rf CMSSW_12_4_23
 rm -f "$TAG"__DIGIPREMIX__cfg.py
-rm -f $AOD_NAME"__job-"${JOBNUM}"__HLT".root
 rm -f "$TAG"__AOD__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}.root
 
 rm -rf CMSSW_13_0_23
 rm -f ${TAG}__MiniAODv4__cfg.py

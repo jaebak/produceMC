@@ -127,6 +127,9 @@ cmsDriver.py  --era Run2_2017 --customise Configuration/DataProcessing/Utils.add
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__SIM__cfg.py
 
+echo "Clean up files"
+rm -f \$Input_filename
+
 echo "----DIGIPREMIX----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17DIGIPremix-01707
 echo "Setting up CMSSW"
@@ -154,6 +157,9 @@ python replace_premix.py -i "$TAG"__DIGIPREMIX__cfg.py -v valid_premix_fragment_
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__DIGIPREMIX__validPremix__cfg.py
 
+echo "Clean up files"
+rm -f \$Input_filename
+
 echo "----HLT----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17HLT-01872
 echo "Setting up CMSSW"
@@ -177,6 +183,9 @@ cmsDriver.py  --era Run2_2017 --customise Configuration/DataProcessing/Utils.add
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__HLT__cfg.py
+
+echo "Clean up files"
+rm -f \$Input_filename
 
 echo "----RECO----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17RECO-01873
@@ -202,6 +211,9 @@ cmsDriver.py  --era Run2_2017 --customise Configuration/DataProcessing/Utils.add
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__AOD__cfg.py
 
+echo "Clean up files"
+rm -f \$Input_filename
+
 echo "----MiniAODv2----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/SUS-RunIISummer20UL17MiniAODv2-01954
 echo "Setting up CMSSW"
@@ -224,6 +236,9 @@ cmsDriver.py  --era Run2_2017 --customise Configuration/DataProcessing/Utils.add
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__MiniAODv2__cfg.py
+
+echo "Clean up files"
+rm -f \$Input_filename
 
 echo "----NanoAODv9----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17NanoAODv9-01947
@@ -249,24 +264,15 @@ echo "Run cmssw with configuration file"
 cmsRun "$TAG"__NanoAODv9__cfg.py
 
 echo "Clean up files"
-
-rm -f ${TAG}__LHE__cfg.py
 rm -rf CMSSW_10_6_47
-rm -f ${AOD_NAME}__job-${JOBNUM}__LHE.root
-rm -f ${AOD_NAME}__job-${JOBNUM}__LHE_inLHE.root
-
+rm -f ${TAG}__LHE__cfg.py
 rm -f ${TAG}__SIM__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}__SIM.root
 rm -f "$TAG"__DIGIPREMIX__cfg.py
 rm -f "$TAG"__DIGIPREMIX__validPremix__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}__DIGIPREMIX.root
 
 rm -rf CMSSW_9_4_14_UL_patch1
-rm -f ${AOD_NAME}__job-${JOBNUM}__HLT.root
 rm -f ${TAG}__HLT__cfg.py
-
 rm -f ${TAG}__AOD__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}.root
 
 rm -rf CMSSW_10_6_47_patch1
 rm -f ${TAG}__MiniAODv2__cfg.py

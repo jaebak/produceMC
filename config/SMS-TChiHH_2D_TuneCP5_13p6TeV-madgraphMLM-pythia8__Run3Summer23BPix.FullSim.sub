@@ -3,7 +3,7 @@ universe = vanilla
 +ProjectName="cms.org.cern"
 
 request_cpus = 2
-#request_disk = 8000000
+request_disk = 8000000
 #request_memory = 1024
 
 Notification = Never
