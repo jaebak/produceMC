@@ -10,8 +10,8 @@
 #     BASE_TAG="SMS-TChiHH_mChi-500_mLSP-1__RunIISummer16"
 # - fragment.py: Fragment should match the name in ENV_FILE. Will be copied to CMSSW/src/Configuration/GenProduction/python/ 
 # Requires a job number and number of events
-if [ $# -ne 3 ]; then
-  echo "[Usage] $0 JOB_NUMBER NUMBER_OF_EVENTS ENV_FILE"
+if [ $# -ne 4 ]; then
+  echo "[Usage] $0 JOB_NUMBER NUMBER_OF_EVENTS ENV_FILE SEED"
   echo "  JOB_NUMBER is used for file names and run number to randomize between jobs"
   echo "  ENV_FILE is used to set names"
   exit
@@ -50,6 +50,7 @@ echo BASE_TAG \= $BASE_TAG
 # Set variables
 JOBNUM=$(($1+1)) #$1 will start from 0. Need to add at least 1.
 NEVENTS=$2
+SEED=$4
 TAG="$BASE_TAG""__job-"${JOBNUM}
 #Fragment_filename="SUS-RunIISummer16FSPremix-00164-fragment_custom.py"
 #AOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16AOD__PUSummer16v3Fast_80X_mcRun2_asymptotic__privateProduction__"$JOBNUM".root"
@@ -78,6 +79,8 @@ cat <<EndOfTestFile > job_scripts/"$TAG"_cmd.sh
 #!/bin/bash
 date
 
+echo "Seed is $SEED"
+
 echo "----GEN----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL18GEN-00108
 echo "Setting up CMSSW"
@@ -98,7 +101,7 @@ cd ../..
 
 echo "Make cmssw configuration file"
 Output_filename=$AOD_NAME"__job-"${JOBNUM}"__LHE".root
-cmsDriver.py Configuration/GenProduction/python/$Fragment_filename --era Run2_2018 --customise Configuration/DataProcessing/Utils.addMonitoring --beamspot Realistic25ns13TeVEarly2018Collision --step GEN --geometry DB:Extended --conditions 106X_upgrade2018_realistic_v4 --customise_commands process.source.numberEventsInLuminosityBlock="cms.untracked.uint32(200) \n from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.resetSeeds(${JOBNUM})" --datatier GEN --eventcontent RAWSIM --python_filename "$TAG"__LHE__cfg.py --fileout file:\$Output_filename -n $NEVENTS --no_exec --mc
+cmsDriver.py Configuration/GenProduction/python/$Fragment_filename --era Run2_2018 --customise Configuration/DataProcessing/Utils.addMonitoring --beamspot Realistic25ns13TeVEarly2018Collision --step GEN --geometry DB:Extended --conditions 106X_upgrade2018_realistic_v4 --customise_commands process.source.numberEventsInLuminosityBlock="cms.untracked.uint32(200) \n from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper ; randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService) ; randSvc.resetSeeds(${SEED})" --datatier GEN --eventcontent RAWSIM --python_filename "$TAG"__LHE__cfg.py --fileout file:\$Output_filename -n $NEVENTS --no_exec --mc
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__LHE__cfg.py
@@ -127,6 +130,9 @@ cmsDriver.py  --era Run2_2018 --customise Configuration/DataProcessing/Utils.add
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__SIM__cfg.py
 
+echo "Clean up files"
+rm -f \$Input_filename
+
 echo "----DIGIPREMIX----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL18DIGIPremix-01729
 echo "Setting up CMSSW"
@@ -154,6 +160,9 @@ python replace_premix.py -i "$TAG"__DIGIPREMIX__cfg.py -v valid_premix_fragment_
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__DIGIPREMIX__validPremix__cfg.py
 
+echo "Clean up files"
+rm -f \$Input_filename
+
 echo "----HLT----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL18HLT-01893
 echo "Setting up CMSSW"
@@ -177,6 +186,9 @@ cmsDriver.py  --era Run2_2018 --customise Configuration/DataProcessing/Utils.add
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__HLT__cfg.py
+
+echo "Clean up files"
+rm -f \$Input_filename
 
 echo "----RECO----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL18RECO-01894
@@ -202,6 +214,9 @@ cmsDriver.py  --era Run2_2018 --customise Configuration/DataProcessing/Utils.add
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__AOD__cfg.py
 
+echo "Clean up files"
+rm -f \$Input_filename
+
 echo "----MiniAODv2----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL18MiniAODv2-01978
 echo "Setting up CMSSW"
@@ -224,6 +239,9 @@ cmsDriver.py  --era Run2_2018 --customise Configuration/DataProcessing/Utils.add
 
 echo "Run cmssw with configuration file"
 cmsRun "$TAG"__MiniAODv2__cfg.py
+
+echo "Clean up files"
+rm -f \$Input_filename
 
 echo "----NanoAODv9----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL18NanoAODv9-01971
@@ -252,21 +270,15 @@ echo "Clean up files"
 
 rm -f ${TAG}__LHE__cfg.py
 rm -rf CMSSW_10_6_47
-rm -f ${AOD_NAME}__job-${JOBNUM}__LHE.root
-rm -f ${AOD_NAME}__job-${JOBNUM}__LHE_inLHE.root
 
 rm -f ${TAG}__SIM__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}__SIM.root
 rm -f "$TAG"__DIGIPREMIX__cfg.py
 rm -f "$TAG"__DIGIPREMIX__validPremix__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}__DIGIPREMIX.root
 
 rm -rf CMSSW_10_2_20_UL
-rm -f ${AOD_NAME}__job-${JOBNUM}__HLT.root
 rm -f ${TAG}__HLT__cfg.py
 
 rm -f ${TAG}__AOD__cfg.py
-rm -f ${AOD_NAME}__job-${JOBNUM}.root
 
 rm -rf CMSSW_10_6_47_patch1
 rm -f ${TAG}__MiniAODv2__cfg.py
