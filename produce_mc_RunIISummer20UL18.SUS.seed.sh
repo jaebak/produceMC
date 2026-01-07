@@ -282,7 +282,7 @@ rm -f ${TAG}__AOD__cfg.py
 
 rm -rf CMSSW_10_6_47_patch1
 rm -f ${TAG}__MiniAODv2__cfg.py
-#rm -f ${MINIAOD_NAME}__job-${JOBNUM}.root
+rm -f ${MINIAOD_NAME}__job-${JOBNUM}.root
 rm -f ${TAG}__NanoAODv9__cfg.py
 
 date
