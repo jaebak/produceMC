@@ -4,7 +4,8 @@ universe = vanilla
 
 request_cpus = 2
 request_disk = 8000000
-#request_memory = 1024
+# 2857 could be needed.
+request_memory = 4096
 
 Notification = Never
 Log=logs/log_produce_mc_$(Cluster).$(Process).log
