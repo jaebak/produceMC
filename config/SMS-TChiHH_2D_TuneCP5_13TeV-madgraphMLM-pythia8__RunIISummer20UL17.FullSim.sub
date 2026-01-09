@@ -4,7 +4,6 @@ universe = vanilla
 
 request_cpus = 2
 request_disk = 8000000
-# 2857 could be needed.
 request_memory = 4096
 
 Notification = Never
