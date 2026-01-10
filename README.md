@@ -62,6 +62,7 @@ condor_submit config/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISu
 # Check jobs
 condor_q
 ```
+
 # Submitting with crab
 ```bash
 # When using CC7
@@ -76,4 +77,11 @@ crab submit -c SMS-TChiHH_2D_TuneCP5_13TeV-madgraphMLM-pythia8__RunIISummer20UL1
 
 # Type in task name at https://cmsweb.cern.ch/crabserver/ui/task/ 
 crab status -d crab_projects/
+```
+
+# Combining files and copying
+```bash
+./scripts/combine_nanoaods.py -i ntuples
+./scripts/combine_nanoaods.py -i ntuples -x
+rsync -avzPhe ssh FILES TARGET
 ```
