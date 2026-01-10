@@ -44,7 +44,7 @@ queue 5
 ## HH->4b is 0.36. Need to increase by 2.7
 #executable = produce_mc_Run3Summer22EE.SUS.seed.rand.sh
 #RND_SEED = $(Process) + 0
-#arguments = $INT(RND_SEED) 3000 SMS-TChiHH_HToGG_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__RunIISummer22EE.FullSim.env $(Seed)
+#arguments = $INT(RND_SEED) 3000 SMS-TChiHH_HToGG_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer22EE.FullSim.env $(Seed)
 #queue 5000
 
 ## Run 2 (3000 could take 14 hours) 
