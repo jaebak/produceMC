@@ -62,3 +62,18 @@ condor_submit config/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8__RunIISu
 # Check jobs
 condor_q
 ```
+# Submitting with crab
+```bash
+# When using CC7
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+cmssw-el7
+cmsrel CMSSW_10_6_47
+cd CMSSW_10_6_47/src
+cmsenv
+cd -
+
+crab submit -c SMS-TChiHH_2D_TuneCP5_13TeV-madgraphMLM-pythia8__RunIISummer20UL18.FullSim.crab.py
+
+# Type in task name at https://cmsweb.cern.ch/crabserver/ui/task/ 
+crab status -d crab_projects/
+```

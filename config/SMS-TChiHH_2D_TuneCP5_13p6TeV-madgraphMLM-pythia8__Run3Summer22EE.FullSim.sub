@@ -5,6 +5,7 @@ universe = vanilla
 request_cpus = 2
 request_disk = 8000000
 request_memory = 4096
++MaxWallTimeMins = 2880
 
 Notification = Never
 Log=logs/log_produce_mc_$(Cluster).$(Process).log
@@ -26,30 +27,30 @@ when_to_transfer_output = ON_EXIT
 #queue
 
 ## Testing small (Takes 1.5 hours)
-#executable = produce_mc_Run3Summer22EE.SUS.seed.sh
+#executable = produce_mc_Run3Summer22EE.SUS.seed.rand.sh
 #RND_SEED = $(Process) + 0
 #arguments = $INT(RND_SEED) 200 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer22EE.FullSim.env $(Seed)
-#queue Seed from ./gen_seeds.py 1 |
+#queue 1
 
 ## Check nanoaod content, Check number of entries for each file
 ## Testing larger (Takes 5 hours)
-#executable = produce_mc_Run3Summer22EE.SUS.seed.sh
+#executable = produce_mc_Run3Summer22EE.SUS.seed.rand.sh
 #RND_SEED = $(Process) + 0
 #arguments = $INT(RND_SEED) 1000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer22EE.FullSim.env $(Seed)
-#queue Seed from ./gen_seeds.py 10 |
+#queue 10
 
 # Run 1 (3000 could take 14 hours) 
 # Need to multiply 1.7 of jobs compared to HToGG due to increase of mass points.
 # HH->4b is 0.36. Need to increase by 2.7
-executable = produce_mc_Run3Summer22EE.SUS.seed.sh
+executable = produce_mc_Run3Summer22EE.SUS.seed.rand.sh
 RND_SEED = $(Process) + 0
 arguments = $INT(RND_SEED) 3000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__RunIISummer22EE.FullSim.env $(Seed)
-queue Seed from ./gen_seeds.py 5000 |
+queue 5000
 
 ## Run 2 (3000 could take 14 hours) 
 ## Need to multiply 1.7 of jobs compared to HToGG due to increase of mass points.
 ## HH->4b is 0.36. Need to increase by 2.7
-#executable = produce_mc_Run3Summer22EE.SUS.seed.sh
+#executable = produce_mc_Run3Summer22EE.SUS.seed.rand.sh
 #RND_SEED = $(Process) + 5000
 #arguments = $INT(RND_SEED) 3000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer22EE.FullSim.env $(Seed)
-#queue Seed from ./gen_seeds.py 5000 |
+#queue 5000
