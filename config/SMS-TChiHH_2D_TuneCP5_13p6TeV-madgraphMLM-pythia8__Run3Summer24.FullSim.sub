@@ -1,0 +1,56 @@
+universe = vanilla
+#+DESIRED_Sites="T2_US_UCSD"
++ProjectName="cms.org.cern"
+
+request_cpus = 2
+request_disk = 8000000
+request_memory = 4096
++MaxWallTimeMins = 2750
+
+Notification = Never
+Log=logs/log_produce_mc_$(Cluster).$(Process).log
+output=logs/log_produce_mc_$(Cluster).$(Process).out
+error=logs/log_produce_mc_$(Cluster).$(Process).err
+
+Requirements = HasSingularity
++SingularityImage = "/cvmfs/unpacked.cern.ch/registry.hub.docker.com/cmssw/el8:x86_64"
+
+transfer_executable = True
+transfer_input_files = voms_proxy.txt,config/SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer24.FullSim.env,config/SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer24__fragment.py
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+# Only around 40% will be produced due to gen step
+
+## Testing condor
+#executable = check_env.sh
+#queue
+
+## Testing small (Takes 1.5 hours)
+#executable = produce_mc_Run3Summer24.SUS.seed.rand.sh
+#RND_SEED = $(Process) + 0
+#arguments = $INT(RND_SEED) 200 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer24.FullSim.env $(Seed)
+#queue 1
+
+# Check nanoaod content, Check number of entries for each file
+# Testing larger (Takes 5 hours)
+executable = produce_mc_Run3Summer24.SUS.seed.rand.sh
+RND_SEED = $(Process) + 0
+arguments = $INT(RND_SEED) 200 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer24.FullSim.env $(Seed)
+queue 5
+
+## Run 1 (3000 could take 14 hours) 
+## Need to multiply 1.7 of jobs compared to HToGG due to increase of mass points.
+## HH->4b is 0.36. Need to increase by 2.7
+#executable = produce_mc_Run3Summer24.SUS.seed.rand.sh
+#RND_SEED = $(Process) + 0
+#arguments = $INT(RND_SEED) 3000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__RunIISummer24.FullSim.env $(Seed)
+#queue 5000
+
+## Run 2 (3000 could take 14 hours) 
+## Need to multiply 1.7 of jobs compared to HToGG due to increase of mass points.
+## HH->4b is 0.36. Need to increase by 2.7
+#executable = produce_mc_Run3Summer24.SUS.seed.rand.sh
+#RND_SEED = $(Process) + 5000
+#arguments = $INT(RND_SEED) 3000 SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer24.FullSim.env $(Seed)
+#queue 5000
