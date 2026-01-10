@@ -27,7 +27,7 @@ config.JobType.psetName    = "PSet.py"
 config.JobType.scriptExe   = "crab_convert_wrapper.sh"
 config.JobType.numCores = 2
 config.JobType.maxMemoryMB = 5000
-config.JobType.maxJobRuntimeMin = 2880
+config.JobType.maxJobRuntimeMin = 2750
 config.JobType.inputFiles  = ["voms_proxy.txt", "config/SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer23BPix.FullSim.env", "config/SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer23BPix__fragment.py", "produce_mc_Run3Summer23BPix.SUS.seed.rand.sh"]
 config.JobType.outputFiles = ["SMS-TChiHH_2D_TuneCP5_13p6TeV-madgraphMLM-pythia8__Run3Summer23BPixNanoAODv12-130X_mcRun3_2023_realistic_postBPix_v6-v2__privateProduction__job.root"]
 
