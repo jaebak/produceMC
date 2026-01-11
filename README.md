@@ -65,11 +65,19 @@ condor_q
 
 # Submitting with crab
 ```bash
-# When using CC7
+# When using el7: Run-2 jobs
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 cmssw-el7
 cmsrel CMSSW_10_6_47
 cd CMSSW_10_6_47/src
+cmsenv
+cd -
+
+# When using el8: Run-3 jobs
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+cmssw-el8
+cmsrel CMSSW_14_0_21
+cd CMSSW_14_0_21/src
 cmsenv
 cd -
 
