@@ -46,13 +46,6 @@ for f in *__job-[0-9]*.root; do
 done
 
 echo "=== Producing FrameworkJobReport.xml (required by CRAB wrapper) ==="
-source /cvmfs/cms.cern.ch/cmsset_default.sh
-# If CRAB shipped CMSSW (typical), CMSSW_BASE is set:
-if [[ -n "${CMSSW_BASE:-}" && -d "${CMSSW_BASE}/src" ]]; then
-  cd "${CMSSW_BASE}/src"
-  eval "$(scramv1 runtime -sh)"
-  cd -
-fi
 # Run a tiny cmsRun using your dummy PSet.py and write the job report
 cmsRun -j FrameworkJobReport.xml PSet.py
 # sanity check
