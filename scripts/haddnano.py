@@ -12,7 +12,7 @@ files = sys.argv[2:]
 def zeroFill(tree, brName, brObj, allowNonBool=False):
     # typename: (numpy type code, root type code)
     branch_type_dict = {'Bool_t': ('?', 'O'), 'Float_t': ('f4', 'F'), 'UInt_t': (
-        'u4', 'i'), 'Long64_t': ('i8', 'L'), 'Double_t': ('f8', 'D')}
+        'u4', 'i'), 'Int_t': ('i4', 'I'), 'Long64_t': ('i8', 'L'), 'Double_t': ('f8', 'D')}
     brType = brObj.GetLeaf(brName).GetTypeName()
     if (not allowNonBool) and (brType != "Bool_t"):
         print(("Did not expect to back fill non-boolean branches ", tree, brName, brObj.GetLeaf(br).GetTypeName()))
@@ -53,6 +53,7 @@ for e in fileHandles[0].GetListOfKeys():
         obj = obj.CloneTree(-1, "fast" if goFast else "")
         branchNames = set([x.GetName() for x in obj.GetListOfBranches()])
     for fh in fileHandles[1:]:
+        print(fh)
         otherObj = fh.GetListOfKeys().FindObject(name).ReadObj()
         inputs.Add(otherObj)
         if isTree and obj.GetName() == 'Events':

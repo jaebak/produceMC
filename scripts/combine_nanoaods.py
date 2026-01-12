@@ -1,50 +1,62 @@
 #!/usr/bin/env python3
-import argparse
-import os
+import argparse, os
+from pathlib import Path
+import subprocess
 
-def extract_job_number(filename: str) -> int:
-  # expects something like ...__job-123.root
-  return int(filename.split('__job-')[1].split('.')[0])
+def extract_job_number(file_name: str) -> int:
+  for job_separator in ("__job-", "__job_"):
+    if job_separator in file_name:
+      return int(file_name.split(job_separator, 1)[1].split(".", 1)[0])
+  raise ValueError(f"Cannot extract job number from: {file_name}")
 
-if __name__ == '__main__':
+def extract_file_prefix(file_name: str) -> str:
+  for job_separator in ("__job-", "__job_"):
+    if job_separator in file_name:
+      return file_name.split(job_separator, 1)[0]
+  raise ValueError(f"Cannot extract file prefix from: {file_name}")
 
-  parser = argparse.ArgumentParser(description='Combines NanoAOD files from multiple jobs')
-  parser.add_argument(
-    '-c','--combine_number_jobs',
-    type=int,
-    default=250,
-    help='Number of files (jobs) to combine per output (default: 250)'
-  )
-  parser.add_argument('-i','--input_folder', required=True, help='Input folder')
-  parser.add_argument('-f','--filter_files', default='NanoAODv9', help='Filter files')
-  parser.add_argument('-x', '--execute', action="store_true", help='Run commands')
-  args = parser.parse_args()
+if __name__ == "__main__":
+  argument_parser = argparse.ArgumentParser(description="Combine NanoAOD files from multiple jobs")
+  argument_parser.add_argument("-i", "--input_folder", required=True,
+                              help="Input folder (can contain subfolders like 0000/, 0001/, ...)")
+  argument_parser.add_argument("-c", "--combine_number_jobs", type=int, default=250,
+                              help="Number of files (jobs) to combine per output (default: 250)")
+  argument_parser.add_argument("-f", "--filter_files", default="",
+                              help="Only include files whose name contains this substring (default: no filter)")
+  argument_parser.add_argument("-x", "--execute", action="store_true", help="Run commands")
+  arguments = argument_parser.parse_args()
 
-  # Find all files
-  all_files = os.listdir(args.input_folder)
-  files = [f for f in all_files if args.filter_files in f and '__job-' in f]
+  input_folder_path = Path(arguments.input_folder)
 
-  # Sort files by job number
-  files.sort(key=extract_job_number)
+  candidate_file_paths = [
+    file_path for file_path in input_folder_path.rglob("*.root")
+    if ("__job-" in file_path.name or "__job_" in file_path.name)
+    and (not arguments.filter_files or arguments.filter_files in file_path.name)
+  ]
 
-  # Combine in fixed-size chunks
-  chunk_size = max(1, args.combine_number_jobs)
+  candidate_file_paths.sort(key=lambda file_path: extract_job_number(file_path.name))
 
-  for start in range(0, len(files), chunk_size):
-    chunk = files[start:start + chunk_size]
-    chunk_paths = [os.path.join(args.input_folder, f) for f in chunk]
+  files_per_output = max(1, arguments.combine_number_jobs)
 
-    first_job = extract_job_number(chunk[0])
-    last_job  = extract_job_number(chunk[-1])
+  for chunk_start_index in range(0, len(candidate_file_paths), files_per_output):
+    file_chunk_paths = candidate_file_paths[chunk_start_index:chunk_start_index + files_per_output]
 
-    # Base prefix from the first file (everything before "__job-")
-    prefix = chunk[0].split('__job-')[0]
+    first_job_number = extract_job_number(file_chunk_paths[0].name)
+    last_job_number  = extract_job_number(file_chunk_paths[-1].name)
+    file_name_prefix = extract_file_prefix(file_chunk_paths[0].name)
 
-    output_file = f"{prefix}__jobs-{first_job}-{last_job}-njobs-{len(chunk)}.root"
-    command = f'python3 scripts/haddnano.py {output_file} {" ".join(chunk_paths)}'
-    print(command)
-    if args.execute:
-      os.system(command)
+    output_file_name = (
+      f"{file_name_prefix}__jobs-{first_job_number}-{last_job_number}-njobs-{len(file_chunk_paths)}.root"
+    )
 
-  if not args.execute:
+    haddnano_command = (
+      f"python3 scripts/haddnano.py {output_file_name} "
+      + " ".join(map(str, file_chunk_paths))
+    )
+
+    print(haddnano_command)
+    if arguments.execute:
+      subprocess.run(haddnano_command, shell=True, check=True)
+
+  if not arguments.execute:
     print("[Info] Add -x argument to run commands")
