@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # Requires below files
 # - replace_premix.py, valid_premix_fragment: Fixes configuration with valid premix files.
 # - voms_proxy.txt : From voms-proxy-init --voms cms --out $(pwd)/voms_proxy.txt -valid 172:0
@@ -56,8 +57,8 @@ TAG="$BASE_TAG""__job-"${JOBNUM}
 #MINIAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16MiniAODv3__PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1__privateProduction__"$JOBNUM".root"
 #NANOAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16NanoAODv7__PUSummer16v3Fast_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1__privateProduction__"$JOBNUM".root"
 
-mkdir config
-mv $Fragment_filename config
+mkdir -p config
+[[ -e $Fragment_filename ]] && mv $Fragment_filename config
 
 if [ ! -f "config/${Fragment_filename}" ]; then
   echo "config/${Fragment_filename} does not exist"
@@ -72,17 +73,18 @@ fi
 
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 
-mkdir job_scripts
+mkdir -p job_scripts
 
 cat <<EndOfTestFile > job_scripts/"$TAG"_cmd.sh
 #!/bin/bash
+set -euo pipefail
 date
 
 echo "----GEN----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17GEN-00368
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_10_6_47/src ] ; then
   echo release CMSSW_10_6_47 already exists
 else
@@ -107,7 +109,7 @@ echo "----SIM----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17SIM-01536
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_10_6_47/src ] ; then
   echo release CMSSW_10_6_47 already exists
 else
@@ -134,7 +136,7 @@ echo "----DIGIPREMIX----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17DIGIPremix-01707
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_10_6_47/src ] ; then
   echo release CMSSW_10_6_47 already exists
 else
@@ -164,7 +166,7 @@ echo "----HLT----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17HLT-01872
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc630
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_9_4_14_UL_patch1/src ] ; then
   echo release CMSSW_9_4_14_UL_patch1 already exists
 else
@@ -191,7 +193,7 @@ echo "----RECO----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17RECO-01873
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_10_6_47/src ] ; then
   echo release CMSSW_10_6_47 already exists
 else
@@ -218,7 +220,7 @@ echo "----MiniAODv2----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_setup/SUS-RunIISummer20UL17MiniAODv2-01954
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_10_6_47_patch1/src ] ; then
   echo release CMSSW_10_6_47_patch1 already exists
 else
@@ -244,7 +246,7 @@ echo "----NanoAODv9----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-RunIISummer20UL17NanoAODv9-01947
 echo "Setting up CMSSW"
 export SCRAM_ARCH=slc7_amd64_gcc700
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_10_6_47_patch1/src ] ; then
   echo release CMSSW_10_6_47_patch1 already exists
 else

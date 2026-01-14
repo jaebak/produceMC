@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # Requires below files
 # - replace_premix.py, valid_premix_fragment: Fixes configuration with valid premix files.
 # - voms_proxy.txt : From voms-proxy-init --voms cms --out $(pwd)/voms_proxy.txt -valid 172:0
@@ -46,8 +47,8 @@ TAG="$BASE_TAG""__job-"${JOBNUM}
 #MINIAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16MiniAODv3__PUSummer16v3Fast_94X_mcRun2_asymptotic_v3-v1__privateProduction__"$JOBNUM".root"
 #NANOAOD_NAME="SMS-TChiHH_mChi-500_mLSP-1_TuneCUETP8M1_13TeV-madgraphMLM-pythia8__RunIISummer16NanoAODv7__PUSummer16v3Fast_Nano02Apr2020_102X_mcRun2_asymptotic_v8-v1__privateProduction__"$JOBNUM".root"
 
-mkdir config
-mv $Fragment_filename config
+mkdir -p config
+[[ -e $Fragment_filename ]] && mv $Fragment_filename config
 
 if [ ! -f "config/${Fragment_filename}" ]; then
   echo "config/${Fragment_filename} does not exist"
@@ -62,17 +63,18 @@ fi
 
 export X509_USER_PROXY=$(pwd)/voms_proxy.txt
 
-mkdir job_scripts
+mkdir -p job_scripts
 
 cat <<EndOfTestFile > job_scripts/"$TAG"_cmd.sh
 #!/bin/bash
+set -euo pipefail
 date
 
 echo "----GEN----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-Run3Summer22EEGS-00033
 echo "Setting up CMSSW"
 export SCRAM_ARCH=el8_amd64_gcc10
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_12_4_24/src ] ; then
   echo release CMSSW_12_4_24 already exists
 else
@@ -97,7 +99,7 @@ echo "----DIGIPREMIX----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-Run3Summer22EEDRPremix-00135
 echo "Setting up CMSSW"
 export SCRAM_ARCH=el8_amd64_gcc10
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_12_4_23/src ] ; then
   echo release CMSSW_12_4_23 already exists
 else
@@ -121,7 +123,6 @@ echo "Clean up files"
 rm -f \$Input_filename
 
 echo "----RECO----"
-
 echo "Make cmssw configuration file"
 Input_filename=$AOD_NAME"__job-"${JOBNUM}"__HLT".root
 Output_filename=$AOD_NAME"__job-"${JOBNUM}.root
@@ -137,7 +138,7 @@ echo "----MiniAODv4----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-Run3Summer22EEMiniAODv4-00152
 echo "Setting up CMSSW"
 export SCRAM_ARCH=el8_amd64_gcc11
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_13_0_23/src ] ; then
   echo release CMSSW_13_0_23 already exists
 else
@@ -163,7 +164,7 @@ echo "----NanoAODv12----"
 # https://cms-pdmv-prod.web.cern.ch/mcm/public/restapi/requests/get_test/SUS-Run3Summer22EENanoAODv12-00049
 echo "Setting up CMSSW"
 export SCRAM_ARCH=el8_amd64_gcc11
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+[[ $- == *u* ]] && U_WAS_ON=1 || U_WAS_ON=0; set +u; source /cvmfs/cms.cern.ch/cmsset_default.sh; ((U_WAS_ON)) && set -u
 if [ -r CMSSW_13_0_23/src ] ; then
   echo release CMSSW_13_0_23 already exists
 else
