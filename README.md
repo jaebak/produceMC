@@ -81,10 +81,60 @@ cd CMSSW_14_0_21/src
 cmsenv
 cd -
 
+# Check if you have write permission
+crab checkwrite --site=T2_KR_KISTI
+
 crab submit -c SMS-TChiHH_2D_TuneCP5_13TeV-madgraphMLM-pythia8__RunIISummer20UL18.FullSim.crab.py
 
 # Type in task name at https://cmsweb.cern.ch/crabserver/ui/task/ 
 crab status -d crab_projects/
+```
+
+# Procedures after production
+
+## Find how many events are produced
+```bash
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+cmsrel CMSSW_15_0_17
+cd CMSSW_15_0_17/src
+cmsenv
+cd -
+
+cd path_to_root_files
+root
+TChain ch("Events")
+ch.Add("*/*.root")
+ch.Scan("Jet_pt")
+ch.GetEntries()
+
+# Find good files by scanning logs. Will scan sub directories.
+./scripts/make_good_file_list.py /path/to/nanoaod_folder
+
+# Stop production if enough events
+cd /path/to/produceMc
+crab kill task_folder
+
+# Combine files
+./scripts/combine_nanoaods.py --good-list good_root_files.txt
+./scripts/combine_nanoaods.py --good-list good_root_files.txt -x
+## OR
+#./scripts/combine_nanoaods.py -i ntuple_folder 
+#./scripts/combine_nanoaods.py -i ntuple_folder -x
+
+# If multiple tasks, use below line to change filename of combined files
+mv task1_nutples* task1
+mv task2_nutples* task2
+# Print commands
+for d in task*/; do t="${d%/}"; for f in "$d"*.root; do [ -e "$f" ] || continue; printf 'mv -n -- %q %q\n' "$f" "${f%.root}-$t.root"; done; done
+# Run the printed commands
+for d in task*/; do t="${d%/}"; for f in "$d"*.root; do [ -e "$f" ] || continue; printf 'mv -n -- %q %q\n' "$f" "${f%.root}-$t.root"; done; done | sh
+
+# Copy files using rsync
+rsync -avzPhe ssh FILES TARGET
+
+# Deleting files on storage
+eval `scram unsetenv -sh`
+gfal-rm -rv 'davs://cms-t2-se01.sdfarm.kr:2880/store/user/jaebak/FOLDERNAME/'
 ```
 
 # Combining files and copying
