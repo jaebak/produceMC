@@ -27,6 +27,11 @@ for a in "$@"; do
   esac
 done
 
+# To be able to see cms crashed jobs
+echo "=== Producing FrameworkJobReport.xml (required by CRAB wrapper) ==="
+cmsRun -j FrameworkJobReport.xml PSet.py || true
+test -s FrameworkJobReport.xml || { echo "FrameworkJobReport.xml missing/empty"; exit 90; }
+
 # Validate
 [[ -n "$SCRIPT" ]] || { echo "ERROR: missing script=..."; exit 2; }
 [[ -n "$EVENTS" ]] || { echo "ERROR: missing events=..."; exit 2; }
@@ -61,9 +66,5 @@ if [[ "$NEV" -eq 0 ]]; then
   echo "ERROR: Events tree has 0 entries"
   STATUS=21
 fi
-
-echo "=== Producing FrameworkJobReport.xml (required by CRAB wrapper) ==="
-cmsRun -j FrameworkJobReport.xml PSet.py || true
-test -s FrameworkJobReport.xml || { echo "FrameworkJobReport.xml missing/empty"; exit 90; }
 
 exit "$STATUS"
