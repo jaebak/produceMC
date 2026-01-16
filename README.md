@@ -100,19 +100,8 @@ cd CMSSW_15_0_17/src
 cmsenv
 cd -
 
-cd path_to_root_files
-root
-TChain ch("Events")
-ch.Add("*/*.root")
-ch.Scan("Jet_pt")
-ch.GetEntries()
-
 # Find good files by scanning logs. Will scan sub directories.
 ./scripts/make_good_file_list.py /path/to/nanoaod_folder
-
-# Stop production if enough events
-cd /path/to/produceMc
-crab kill task_folder
 
 # Combine files
 ./scripts/combine_nanoaods.py --good-list good_root_files.txt
@@ -120,6 +109,18 @@ crab kill task_folder
 ## OR
 #./scripts/combine_nanoaods.py -i ntuple_folder 
 #./scripts/combine_nanoaods.py -i ntuple_folder -x
+
+# Check number of events
+cd path_to_root_files
+root
+TChain ch("Events")
+ch.Add("*.root")
+ch.Scan("Jet_pt")
+ch.GetEntries()
+
+# Stop production if enough events
+cd /path/to/produceMc
+crab kill task_folder
 
 # If multiple tasks, use below line to change filename of combined files
 mv task1_nutples* task1
