@@ -94,6 +94,7 @@ crab status -d crab_projects/
 
 ## Find how many events are produced
 ```bash
+screen 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 cmsrel CMSSW_15_0_17
 cd CMSSW_15_0_17/src

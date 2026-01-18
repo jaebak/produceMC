@@ -25,10 +25,12 @@ ERROR_PATTERNS = [
     re.compile(r"\bTraceback \(most recent call last\)\b", re.IGNORECASE),
 ]
 
+RootInfo = Tuple[str, str]  # (job, prefix)
 
-def find_root_files(input_folder: Path, verbose: bool = True) -> Dict[Path, str]:
+
+def find_root_files(input_folder: Path, verbose: bool = True) -> Dict[Path, RootInfo]:
     """Top-level scan first; if none found, recurse. Prints progress while searching."""
-    root_files: Dict[Path, str] = {}
+    root_files: Dict[Path, RootInfo] = {}
 
     if verbose:
         print(f"[INFO] Searching for ROOT files in: {input_folder}", flush=True)
@@ -39,7 +41,8 @@ def find_root_files(input_folder: Path, verbose: bool = True) -> Dict[Path, str]
             m = ROOT_JOB_RE.match(p.name)
             if m:
                 job = m.group("job")
-                root_files[p] = job
+                prefix = m.group("prefix")
+                root_files[p] = (job, prefix)
                 if verbose:
                     print(f"[FOUND] {p} (job {job})", flush=True)
 
@@ -62,7 +65,8 @@ def find_root_files(input_folder: Path, verbose: bool = True) -> Dict[Path, str]
         m = ROOT_JOB_RE.match(p.name)
         if m:
             job = m.group("job")
-            root_files[p] = job
+            prefix = m.group("prefix")
+            root_files[p] = (job, prefix)
             if verbose:
                 print(f"[FOUND] {p} (job {job})", flush=True)
 
@@ -192,6 +196,50 @@ def format_error_report(root_path: str, job: str, status: str, snippets: List[st
     return "\n".join(lines)
 
 
+def _expand_output_path(
+    template: Optional[str],
+    *,
+    prefix: str,
+    default_name: str,
+    run_folder: Path,
+    multiple_prefixes: bool,
+) -> Path:
+    """
+    Build an output path.
+
+    Default behavior (template is None):
+      - write into the folder where the script is run (cwd): run_folder/default_name
+
+    If template contains "{prefix}":
+      - format it (e.g. "out/{prefix}_good.txt")
+
+    If template looks like a directory (ends with "/" or exists as dir):
+      - put default_name inside it
+
+    If multiple_prefixes and template has no "{prefix}":
+      - prefix the filename with "<prefix>__" to avoid collisions
+    """
+    if template is None:
+        return (run_folder / default_name).expanduser().resolve()
+
+    tmpl = os.path.expanduser(template)
+    if "{prefix}" in tmpl:
+        return Path(tmpl.format(prefix=prefix)).expanduser().resolve()
+
+    p = Path(tmpl).expanduser()
+
+    # treat as directory if it ends with a slash OR is an existing directory
+    if tmpl.endswith("/") or tmpl.endswith(os.sep) or (p.exists() and p.is_dir()):
+        return (p / default_name).expanduser().resolve()
+
+    # single-prefix: respect explicit filename as-is
+    if not multiple_prefixes:
+        return p.resolve()
+
+    # multi-prefix: avoid overwriting by inserting prefix
+    return (p.parent / f"{prefix}__{p.name}").expanduser().resolve()
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Check cmsRun logs to decide which ROOT files are good (parallel, streaming prints)."
@@ -204,18 +252,27 @@ def main() -> int:
     )
     ap.add_argument(
         "--output-good",
-        default="good_root_files.txt",
-        help="Output text file listing GOOD ROOT file paths (default: good_root_files.txt)",
+        default=None,
+        help=(
+            "Output path for GOOD list (optionally use {prefix}). "
+            "Default: <cwd>/<prefix>__good_root_files.txt"
+        ),
     )
     ap.add_argument(
         "--output-bad",
-        default="bad_root_files.txt",
-        help="Output text file listing BAD ROOT file paths (default: bad_root_files.txt)",
+        default=None,
+        help=(
+            "Output path for BAD list (optionally use {prefix}). "
+            "Default: <cwd>/<prefix>__bad_root_files.txt"
+        ),
     )
     ap.add_argument(
         "--output-errors",
-        default="bad_root_files_errors.txt",
-        help="Output text file containing error reports/snippets for BAD jobs (default: bad_root_files_errors.txt)",
+        default=None,
+        help=(
+            "Output path for BAD errors report (optionally use {prefix}). "
+            "Default: <cwd>/<prefix>__bad_root_files_errors.txt"
+        ),
     )
     ap.add_argument(
         "--workers",
@@ -241,32 +298,69 @@ def main() -> int:
         print(f"ERROR: INPUT_FOLDER is not a directory: {input_folder}", file=sys.stderr)
         return 2
 
-    out_good = Path(args.output_good).expanduser().resolve()
-    out_bad = Path(args.output_bad).expanduser().resolve()
-    out_err = Path(args.output_errors).expanduser().resolve()
-
-    if out_good.exists() or out_bad.exists() or out_err.exists():
-        if out_good.exists():
-            print(f"[INFO] Output GOOD file already exists: {out_good}")
-        if out_bad.exists():
-            print(f"[INFO] Output BAD file already exists: {out_bad}")
-        if out_err.exists():
-            print(f"[INFO] Output ERRORS file already exists: {out_err}")
-        print("[INFO] Exiting without doing any work.")
-        return 0
+    run_folder = Path.cwd().resolve()
 
     root_files = find_root_files(input_folder, verbose=not args.quiet_find)
     if not root_files:
         print(f"No ROOT files matching '*__job_XX.root' found in: {input_folder}", file=sys.stderr)
         return 1
 
-    items = sorted(root_files.items(), key=lambda kv: job_sort_key(kv[1]))
+    prefixes = sorted({info[1] for info in root_files.values()})
+    multiple_prefixes = len(prefixes) > 1
+
+    # Build per-prefix output paths (defaulting to run_folder)
+    out_paths: Dict[str, Tuple[Path, Path, Path]] = {}
+    for prefix in prefixes:
+        out_good = _expand_output_path(
+            args.output_good,
+            prefix=prefix,
+            default_name=f"{prefix}__good_root_files.txt",
+            run_folder=run_folder,
+            multiple_prefixes=multiple_prefixes,
+        )
+        out_bad = _expand_output_path(
+            args.output_bad,
+            prefix=prefix,
+            default_name=f"{prefix}__bad_root_files.txt",
+            run_folder=run_folder,
+            multiple_prefixes=multiple_prefixes,
+        )
+        out_err = _expand_output_path(
+            args.output_errors,
+            prefix=prefix,
+            default_name=f"{prefix}__bad_root_files_errors.txt",
+            run_folder=run_folder,
+            multiple_prefixes=multiple_prefixes,
+        )
+        out_paths[prefix] = (out_good, out_bad, out_err)
+
+    # Do not overwrite any outputs
+    existing: List[Tuple[str, Path]] = []
+    for (og, ob, oe) in out_paths.values():
+        if og.exists():
+            existing.append(("GOOD", og))
+        if ob.exists():
+            existing.append(("BAD", ob))
+        if oe.exists():
+            existing.append(("ERRORS", oe))
+    if existing:
+        for kind, p in existing:
+            print(f"[INFO] Output {kind} file already exists: {p}")
+        print("[INFO] Exiting without doing any work.")
+        return 0
+
+    # Sort items by job id
+    items = sorted(root_files.items(), key=lambda kv: job_sort_key(kv[1][0]))
     workers = max(1, args.workers)
 
     print_lock = threading.Lock()
-    good_files: List[str] = []
-    bad_files: List[str] = []
-    bad_error_reports: List[Tuple[str, str, str, List[str]]] = []  # (root_path, job, status, snippets)
+
+    good_by_prefix: Dict[str, List[str]] = {p: [] for p in prefixes}
+    bad_by_prefix: Dict[str, List[str]] = {p: [] for p in prefixes}
+    bad_reports_by_prefix: Dict[str, List[Tuple[str, str, str, List[str]]]] = {p: [] for p in prefixes}
+
+    job_by_path = {str(p): info[0] for p, info in root_files.items()}
+    prefix_by_path = {str(p): info[1] for p, info in root_files.items()}
 
     def safe_print(*a, **k):
         with print_lock:
@@ -277,18 +371,19 @@ def main() -> int:
     with ProcessPoolExecutor(max_workers=workers) as ex:
         futures = [
             ex.submit(check_one_root, str(root_path), job, args.log_folder, args.context_lines)
-            for (root_path, job) in items
+            for (root_path, (job, _prefix)) in items
         ]
 
         for fut in as_completed(futures):
             root_path, job, is_good, status, snippets = fut.result()
+            prefix = prefix_by_path.get(root_path, "UNKNOWN")
 
             if is_good:
-                good_files.append(root_path)
+                good_by_prefix.setdefault(prefix, []).append(root_path)
                 safe_print(f"[GOOD] job {job}: {root_path}")
             else:
-                bad_files.append(root_path)
-                bad_error_reports.append((root_path, job, status, snippets))
+                bad_by_prefix.setdefault(prefix, []).append(root_path)
+                bad_reports_by_prefix.setdefault(prefix, []).append((root_path, job, status, snippets))
 
                 if snippets:
                     safe_print(f"[BAD ] job {job}: {Path(root_path).name} -> {status}:")
@@ -299,38 +394,56 @@ def main() -> int:
                 else:
                     safe_print(f"[BAD ] job {job}: {Path(root_path).name} -> {status}")
 
-    # Sort outputs by job id (best effort)
-    job_by_path = {str(p): j for p, j in root_files.items()}
-    good_sorted = sorted(good_files, key=lambda p: job_sort_key(job_by_path.get(p, "999999999")))
-    bad_sorted = sorted(bad_files, key=lambda p: job_sort_key(job_by_path.get(p, "999999999")))
-    bad_reports_sorted = sorted(
-        bad_error_reports, key=lambda t: job_sort_key(t[1])
-    )  # sort by job
-
-    # Write output files
+    # Write output files (per prefix)
     try:
-        with out_good.open("w", encoding="utf-8") as f:
-            for p in good_sorted:
-                f.write(p + "\n")
-        with out_bad.open("w", encoding="utf-8") as f:
-            for p in bad_sorted:
-                f.write(p + "\n")
+        for prefix in prefixes:
+            out_good, out_bad, out_err = out_paths[prefix]
 
-        # Errors file
-        with out_err.open("w", encoding="utf-8") as f:
-            for root_path, job, status, snippets in bad_reports_sorted:
-                f.write(format_error_report(root_path, job, status, snippets))
+            good_sorted = sorted(
+                good_by_prefix.get(prefix, []),
+                key=lambda p: job_sort_key(job_by_path.get(p, "999999999")),
+            )
+            bad_sorted = sorted(
+                bad_by_prefix.get(prefix, []),
+                key=lambda p: job_sort_key(job_by_path.get(p, "999999999")),
+            )
+            bad_reports_sorted = sorted(
+                bad_reports_by_prefix.get(prefix, []),
+                key=lambda t: job_sort_key(t[1]),
+            )
+
+            out_good.parent.mkdir(parents=True, exist_ok=True)
+            out_bad.parent.mkdir(parents=True, exist_ok=True)
+            out_err.parent.mkdir(parents=True, exist_ok=True)
+
+            with out_good.open("w", encoding="utf-8") as f:
+                for p in good_sorted:
+                    f.write(p + "\n")
+            with out_bad.open("w", encoding="utf-8") as f:
+                for p in bad_sorted:
+                    f.write(p + "\n")
+            with out_err.open("w", encoding="utf-8") as f:
+                for root_path, job, status, snippets in bad_reports_sorted:
+                    f.write(format_error_report(root_path, job, status, snippets))
     except OSError as e:
         print(f"ERROR: Could not write output file(s): {e}", file=sys.stderr)
         return 3
 
     print("\n=== Summary ===")
+    print(f"Run folder (cwd): {run_folder}")
     print(f"Input folder: {input_folder}")
     print(f"Root files found: {len(root_files)}")
     print(f"Workers used: {workers}")
-    print(f"Good files: {len(good_sorted)} -> {out_good}")
-    print(f"Bad files:  {len(bad_sorted)} -> {out_bad}")
-    print(f"Errors file: {out_err}")
+    print(f"Prefixes: {len(prefixes)}")
+    for prefix in prefixes:
+        out_good, out_bad, out_err = out_paths[prefix]
+        ng = len(good_by_prefix.get(prefix, []))
+        nb = len(bad_by_prefix.get(prefix, []))
+        print(
+            f"- {prefix}: good {ng} -> {out_good.name}; "
+            f"bad {nb} -> {out_bad.name}; "
+            f"errors -> {out_err.name}"
+        )
 
     return 0
 
