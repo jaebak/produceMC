@@ -102,7 +102,7 @@ cmsenv
 cd -
 
 # Find good files by scanning logs. Will scan sub directories.
-./scripts/make_good_file_list.py /path/to/nanoaod_folder
+./scripts/make_good_file_list_crab_kisti.py /path/to/nanoaod_folder
 
 # Combine files
 ./scripts/combine_nanoaods.py --good-list good_root_files.txt
@@ -144,4 +144,9 @@ gfal-rm -rv 'davs://cms-t2-se01.sdfarm.kr:2880/store/user/jaebak/FOLDERNAME/'
 ./scripts/combine_nanoaods.py -i ntuples
 ./scripts/combine_nanoaods.py -i ntuples -x
 rsync -avzPhe ssh FILES TARGET
+```
+
+# Using xrdfs
+```bash
+xrdfs cms-t2-se01.sdfarm.kr:1094 ls /store/user/jaebak
 ```
