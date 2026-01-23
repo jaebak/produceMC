@@ -90,6 +90,17 @@ crab submit -c SMS-TChiHH_2D_TuneCP5_13TeV-madgraphMLM-pythia8__RunIISummer20UL1
 crab status -d crab_projects/
 ```
 
+# Procedures after test task
+```bash
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+cmsrel CMSSW_15_0_17
+cd CMSSW_15_0_17/src
+cmsenv
+cd -
+
+./script/check_test_root.py /T2_.../
+```
+
 # Procedures after production
 
 ## Find how many events are produced
@@ -116,8 +127,8 @@ cd path_to_root_files
 root
 TChain ch("Events")
 ch.Add("*.root")
-ch.Scan("Jet_pt")
 ch.GetEntries()
+ch.Scan("Jet_pt")
 
 # Stop production if enough events
 cd /path/to/produceMc
