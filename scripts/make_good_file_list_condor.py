@@ -233,7 +233,11 @@ def main() -> int:
     ap.add_argument("ntuples_dir", help="Directory containing ROOT ntuples (searched top-level first, then recursively).")
     ap.add_argument("condor_id", help="condor_id used in log_produce_mc_<condor_id>.<ZZZ>.(out|err)")
 
-    ap.add_argument("--logs-dir", default="logs", help="Directory containing logs (default: logs)")
+    ap.add_argument(
+        "--logs-dir",
+        default="logs",
+        help="Directory containing logs. If a relative path, it is interpreted relative to ntuples-dir (default: logs).",
+    )
     ap.add_argument(
         "--offset",
         type=int,
@@ -279,7 +283,14 @@ def main() -> int:
         print(f"ERROR: ntuples-dir is not a directory: {ntuples_dir}", file=sys.stderr)
         return 2
 
-    logs_dir = Path(args.logs_dir).expanduser().resolve()
+    # Make logs-dir follow ntuples-dir:
+    # - If --logs-dir is absolute, use it as-is.
+    # - If relative (including default "logs"), interpret it relative to ntuples_dir.
+    logs_dir = Path(args.logs_dir).expanduser()
+    if not logs_dir.is_absolute():
+        logs_dir = ntuples_dir / logs_dir
+    logs_dir = logs_dir.resolve()
+
     condor_id = str(args.condor_id)
 
     if args.n_jobs is not None and args.n_jobs < 0:
@@ -459,3 +470,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
