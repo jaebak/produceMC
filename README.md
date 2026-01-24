@@ -113,7 +113,7 @@ cmsenv
 cd -
 
 # Find good files by scanning logs. Will scan sub directories.
-./scripts/make_good_file_list_crab_kisti.py /path/to/nanoaod_folder
+./scripts/make_good_file_list_kisti.py /path/to/nanoaod_folder
 
 # Combine files
 ./scripts/combine_nanoaods.py --good-list good_root_files.txt
